@@ -92,6 +92,7 @@ ax = plt.gca()
 ax.margins(0.10)
 plt.axis("off")
 plt.show()
+
 '''
 ## Output:
 ''' 
