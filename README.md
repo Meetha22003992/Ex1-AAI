@@ -38,26 +38,30 @@ Step 14:Update margins and display the graph using matplotlib.pyplot<br/>
 
 ## Program:
 ```
-import networkx as nx
-import pandas as pd
-import matplotlib.pyplot as plt
+pip install pybbn
+import pandas as pd # for data manipulation
+import networkx as nx # for drawing graphs
+import matplotlib.pyplot as plt # for drawing graphs
+# for creating Bayesian Belief Networks (BBN)
 from pybbn.graph.dag import Bbn
-from pybbn.graph.dag import Edge,EdgeType
+from pybbn.graph.edge import Edge, EdgeType
 from pybbn.graph.jointree import EvidenceBuilder
 from pybbn.graph.node import BbnNode
 from pybbn.graph.variable import Variable
 from pybbn.pptc.inferencecontroller import InferenceController
+#Set Pandas options to display more columns
 pd.options.display.max_columns=50
 
 df=pd.read_csv('weatherAUS.csv',encoding='utf-8')
+print(df)
 df=df[pd.isnull(df['RainTomorrow'])==False]
-
-df=df.fillna(df.mean())
-
+#df=df.fillna(df.mean())
+# Fill missing values with the mean of numeric columns
+numeric_columns = df.select_dtypes(include='number').columns
+df[numeric_columns] = df[numeric_columns].fillna(df[numeric_columns].mean())
 df['WindGustSpeedCat']=df['WindGustSpeed'].apply(lambda x: '0.<=40'   if x<=40 else '1.40-50' if 40<x<=50 else '2.>50')
 df['Humidity9amCat']=df['Humidity9am'].apply(lambda x: '1.>60' if x>60 else '0.<=60')
 df['Humidity3pmCat']=df['Humidity3pm'].apply(lambda x: '1.>60' if x>60 else '0.<=60')
-print(df)
 
 def probs(data, child, parent1=None, parent2=None):
     if parent1==None:
@@ -74,7 +78,7 @@ def probs(data, child, parent1=None, parent2=None):
     else: print("Error in Probability Frequency Calculations")
     return prob
 
-H9am = BbnNode(Variable(0, 'H9am', ['<=60', '>60']), probs(df, child='Humidity9amCat'))
+    H9am = BbnNode(Variable(0, 'H9am', ['<=60', '>60']), probs(df, child='Humidity9amCat'))
 H3pm = BbnNode(Variable(1, 'H3pm', ['<=60', '>60']), probs(df, child='Humidity3pmCat', parent1='Humidity9amCat'))
 W = BbnNode(Variable(2, 'W', ['<=40', '40-50', '>50']), probs(df, child='WindGustSpeedCat'))
 RT = BbnNode(Variable(3, 'RT', ['No', 'Yes']), probs(df, child='RainTomorrow', parent1='Humidity3pmCat', parent2='WindGustSpeedCat'))
@@ -89,14 +93,14 @@ bbn = Bbn() \
     .add_edge(Edge(W, RT, EdgeType.DIRECTED))
 
 join_tree = InferenceController.apply(bbn)
-pos={0: (-1,0), 1: (-1, 0.5), 2: (1, 0), 3:(0,-0.5)}
+pos={0: (-1,2), 1: (-1, 0.5), 2: (1, 0.5), 3:(0,-1)}
 
 options = {
     "font_size": 16,
     "node_size": 4000,
-    "node_color": "pink",
+    "node_color": "yellow",
     "edgecolors": "blue",
-    "edge_color": "green",
+    "edge_color": "purple",
     "linewidths": 5,
     "width": 5,}
 
@@ -119,8 +123,7 @@ plt.show()
 
 ### Graph:
 
-![image](https://github.com/Meetha22003992/Ex1-AAI/assets/119401038/5f8364a4-721d-45f3-8ac5-b0e038fe9227)
-
+![image](https://github.com/Meetha22003992/Ex1-AAI/assets/119401038/2d4227f6-8e2f-47ee-89b1-ab63d57b4bfb)
 
 ## Result:
    Thus a Bayesian Network is generated using Python
